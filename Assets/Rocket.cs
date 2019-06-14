@@ -10,8 +10,13 @@ public class Rocket : MonoBehaviour {
     [SerializeField] AudioClip Death;
     [SerializeField] AudioClip nextLevel;
 
+    [SerializeField] ParticleSystem mainEngineParticle;
+    [SerializeField] ParticleSystem DeathParticle;
+    [SerializeField] ParticleSystem nextLevelParticle;
+
     Rigidbody rigidBody;
     AudioSource audioSource;
+    
 
 	// Use this for initialization
 	void Start () {
@@ -39,8 +44,8 @@ public class Rocket : MonoBehaviour {
         switch (collision.gameObject.tag)
         {
             case "Friendly":
-                Scene scene = SceneManager.GetActiveScene();
-                SceneManager.LoadScene(scene.name);
+              //  Scene scene = SceneManager.GetActiveScene();
+              //  SceneManager.LoadScene(scene.name);
                 break;
             case "Finish":
                 StartSuccessSequence();
@@ -54,12 +59,16 @@ public class Rocket : MonoBehaviour {
     {
         audioSource.PlayOneShot(nextLevel);
         audioSource.Stop();
+        nextLevelParticle.Play();
         state = State.Transanding;
         Invoke("LoadNextLevel", 1f);
     }
     private void StartDeathSequence()
     {
         state = State.Dead;
+        audioSource.Stop();
+        DeathParticle.Play();
+        mainEngineParticle.Stop();
         audioSource.Stop();
         audioSource.PlayOneShot(Death);
         Invoke("LoadFirstLevel", 1f);
@@ -85,11 +94,14 @@ public class Rocket : MonoBehaviour {
             if (!audioSource.isPlaying) // so it doesn't layer
             {
                 audioSource.PlayOneShot(mainEngine);
+                mainEngineParticle.Play();
+                
             }
         }
         else
         {
             audioSource.Stop();
+            mainEngineParticle.Stop();
         }
     }
 
