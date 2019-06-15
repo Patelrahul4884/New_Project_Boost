@@ -1,5 +1,4 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Rocket : MonoBehaviour {
@@ -16,8 +15,8 @@ public class Rocket : MonoBehaviour {
 
     Rigidbody rigidBody;
     AudioSource audioSource;
-    
 
+    bool CollisonDisabled = false;
 	// Use this for initialization
 	void Start () {
         rigidBody = GetComponent<Rigidbody>();
@@ -31,12 +30,30 @@ public class Rocket : MonoBehaviour {
         {
             Thrust();
             Rotate();
+           
         }
-	}
+        if (Debug.isDebugBuild)
+        {
+            debugkey();
+
+        }
+    }
+    private void debugkey()
+    {
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            LoadNextLevel();
+        }
+        else if(Input.GetKeyDown(KeyCode.C))
+        {
+            CollisonDisabled = !CollisonDisabled;
+        }
+       
+    }
    
     void OnCollisionEnter(Collision collision)
     {
-        if(state!=State.Alive)
+        if(state!=State.Alive || CollisonDisabled)
         {
            
             return;
@@ -58,7 +75,6 @@ public class Rocket : MonoBehaviour {
     private void StartSuccessSequence()
     {
         audioSource.PlayOneShot(nextLevel);
-        audioSource.Stop();
         nextLevelParticle.Play();
         state = State.Transanding;
         Invoke("LoadNextLevel", 1f);
@@ -79,7 +95,13 @@ public class Rocket : MonoBehaviour {
 
     private  void LoadNextLevel()
     {
-        SceneManager.LoadScene(1);
+       int currentScene= SceneManager.GetActiveScene().buildIndex;
+        int nextSceneIndex = currentScene + 1;
+        if(SceneManager.sceneCountInBuildSettings== nextSceneIndex)
+        {
+            nextSceneIndex = 0;
+        }
+        SceneManager.LoadScene(nextSceneIndex);
     }
     private  void LoadFirstLevel()
     {
@@ -121,4 +143,5 @@ public class Rocket : MonoBehaviour {
 
         rigidBody.freezeRotation = false; // resume physics control of rotation
     }
+
 }
